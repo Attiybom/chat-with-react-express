@@ -40,7 +40,12 @@ io.on("connection", (socket) => {
 
   // 接收消息
   socket.on("new_message", (data) => {
-    console.log("New message received ", data);
+    // console.log("New message received ", data);
+
+    // 广播给除自己之外的所有用户
+    socket.broadcast.emit(`Message-Received`, data)
+
+
   });
 
   startTimer();
