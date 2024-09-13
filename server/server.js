@@ -25,33 +25,39 @@ const startTimer = () => {
       io.emit("message_response", { count });
     }, 2000);
   }
-}
+};
 
 const stopTimer = () => {
   if (timer && clientsCount === 0) {
     clearInterval(timer);
     timer = null;
   }
- }
+};
 
 io.on("connection", (socket) => {
   // 连接成功
   console.log(`a user:${socket.id} connected`);
 
+  // 加入房间
+  socket.on("join_room", (room) => {
+    console.log(`user:${socket.id} joined room ${room}`);
+    socket.join(room);
+  });
+
   // 接收消息
   socket.on("new_message", (data) => {
     // console.log("New message received ", data);
-
     // 广播给除自己之外的所有用户
-    socket.broadcast.emit(`Message-Received`, data)
+    // socket.broadcast.emit(`Message-Received`, data)
 
-
+    const { message, room } = data;
+    io.to(room).emit("Message-Received", { message });
   });
 
+  // 数字定时器
   startTimer();
 
-
-  // 清除定时器
+  // 断开连接时候，清除数字定时器
   socket.on("disconnect", () => {
     console.log(`user:${socket.id} disconnected`);
     clientsCount--;
